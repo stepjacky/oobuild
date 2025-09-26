@@ -81,6 +81,7 @@ def make():
     # correct ios frameworks
     if ("ios" == platform):
       base.for_each_framework(root_dir, "ios", callbacks=[base.generate_plist, base.generate_xcprivacy])
+      base.for_each_framework(root_dir, "ios", callbacks=[base.sign_xcframework], target_ext=".xcframework")
       deploy_fonts(git_dir, root_dir)
       base.copy_dictionaries(git_dir + "/dictionaries", root_dir + "/dictionaries", True, False)
 

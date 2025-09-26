@@ -1086,7 +1086,20 @@ def generate_xcprivacy(file, platform):
   fileInfo.close()
   return
 
-def for_each_framework(path, platform, callbacks, max_depth=512):
+def sign_xcframework(file, platform):
+  identity = get_env("CODE_SIGN_IDENTITY")
+  if not identity:
+    print("warning: to sign XCFramework bundles you must first set the signing identity as the environment variable CODE_SIGN_IDENTITY.")
+    print("         see available identities with: `security find-identity`.")
+    return
+
+  # sign
+  cmd("codesign", ["--timestamp", "-f", "-s", identity, file])
+  # verify because sometimes codesign may fail silently
+  cmd("codesign", ["--verify", "--deep", "--strict", "--verbose=4", file])
+  return
+
+def for_each_framework(path, platform, callbacks, max_depth=512, target_ext=".framework"):
   if not config.check_option("config", "bundle_dylibs"):
     return
   if max_depth == 0:
@@ -1097,11 +1110,11 @@ def for_each_framework(path, platform, callbacks, max_depth=512):
   src_folder += "*"
   for file in glob.glob(src_folder):
     if (is_dir(file)):
-      if file.endswith(".framework"):
+      if file.endswith(target_ext):
         for callback in callbacks:
           callback(file, platform)
       else:
-        for_each_framework(file, platform, callbacks, max_depth - 1)
+        for_each_framework(file, platform, callbacks, max_depth - 1, target_ext)
   return
 
 def correct_bundle_identifier(bundle_identifier):
