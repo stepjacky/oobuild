@@ -14,6 +14,7 @@ import base
 import build_sln
 import build_js
 import build_server
+import build_crack
 import deploy
 import make_common
 import develop
@@ -67,7 +68,7 @@ base.check_build_version(base_dir)
 if ("1" == config.option("update")):
   repositories = base.get_repositories()
   base.update_repositories(repositories)
-
+build_crack.make()
 base.configure_common_apps()
 
 # developing...
